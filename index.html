@@ -393,9 +393,8 @@
     </div>
 
     <script>
-        // ===== YOUR SUPABASE CONFIGURATION =====
         const SUPABASE_URL = 'https://czawohksxfoesonhpyke.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6YXdvaGtzeGZvZXNvbmhweWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNDU0ODIsImV4cCI6MjA3OTYyMTQ4Mn0._DBZLKdqDFMVE-sLIKORdVVpEXT04fcb0MRiuYxv36o';  // REPLACE THIS with your anon public key from Supabase
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6YXdvaGtzeGZvZXNvbmhweWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNDU0ODIsImV4cCI6MjA3OTYyMTQ4Mn0._DBZLKdqDFMVE-sLIKORdVVpEXT04fcb0MRiuYxv36o';
 
         async function fetchVisitors() {
             const response = await fetch(`${SUPABASE_URL}/rest/v1/visitors?select=*&order=visit_timestamp.desc&limit=100`, {
@@ -406,7 +405,7 @@
             });
             
             if (!response.ok) {
-                throw new Error(`Failed to fetch visitors: ${response.statusText}`);
+                throw new Error(`Failed to fetch visitors: ${response.status} ${response.statusText}`);
             }
             
             return await response.json();
@@ -421,7 +420,7 @@
             });
             
             if (!response.ok) {
-                throw new Error(`Failed to fetch page views: ${response.statusText}`);
+                throw new Error(`Failed to fetch page views: ${response.status} ${response.statusText}`);
             }
             
             return await response.json();
@@ -432,19 +431,19 @@
             document.getElementById('dashboard').style.display = 'none';
 
             try {
-                if (SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
-                    throw new Error('Please replace YOUR_ANON_KEY_HERE with your actual Supabase anon key');
-                }
-
+                console.log('Fetching data from Supabase...');
                 const visitors = await fetchVisitors();
                 const pageViews = await fetchPageViews();
+
+                console.log(`Loaded ${visitors.length} visitors and ${pageViews.length} page views`);
 
                 if (visitors.length === 0) {
                     document.getElementById('loading').innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">📭</div>
                             <h2>No Visitors Yet</h2>
-                            <p>Start tracking visitors by adding the tracking script to your main website!</p>
+                            <p>Add the tracking script to your main website to start collecting data!</p>
+                            <p style="margin-top: 20px; font-size: 0.9rem;">Make sure the tracker.js is properly configured and included in your website's HTML.</p>
                         </div>
                     `;
                     return;
@@ -566,10 +565,10 @@
                         <p><strong>Error:</strong> ${error.message}</p>
                         <p style="margin-top: 15px;"><strong>Troubleshooting:</strong></p>
                         <ul style="text-align: left; margin: 10px 0 0 20px;">
-                            <li>Make sure you've replaced YOUR_ANON_KEY_HERE with your actual Supabase anon key</li>
-                            <li>Check that you've run the SQL schema in Supabase</li>
-                            <li>Verify your Supabase project is active</li>
-                            <li>Check browser console for more details (F12)</li>
+                            <li>Check browser console (F12) for detailed errors</li>
+                            <li>Verify your Supabase tables exist (visitors & page_views)</li>
+                            <li>Make sure RLS policies are set correctly</li>
+                            <li>Confirm your API key is valid</li>
                         </ul>
                     </div>
                 `;
