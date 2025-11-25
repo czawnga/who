@@ -332,7 +332,6 @@
         </div>
 
         <div id="dashboard" style="display:none;">
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">👥</div>
@@ -356,25 +355,21 @@
                 </div>
             </div>
 
-            <!-- Geographic Distribution -->
             <div class="section">
                 <h2 class="section-title">🌍 Geographic Distribution</h2>
                 <div id="countryList" class="country-grid"></div>
             </div>
 
-            <!-- Device Breakdown -->
             <div class="section">
                 <h2 class="section-title">📱 Device Breakdown</h2>
                 <div id="deviceChart" class="device-chart"></div>
             </div>
 
-            <!-- Browser Stats -->
             <div class="section">
                 <h2 class="section-title">🌐 Browser Statistics</h2>
                 <div id="browserStats" class="country-grid"></div>
             </div>
 
-            <!-- Recent Visitors -->
             <div class="section">
                 <h2 class="section-title">👥 Recent Visitors (Last 50)</h2>
                 <div style="overflow-x: auto;">
@@ -398,11 +393,10 @@
     </div>
 
     <script>
-        // ===== CONFIGURATION - REPLACE THESE VALUES =====
-        const SUPABASE_URL = 'https://czawohksxfoesonhpyke.supabase.co';  // e.g., https://abcdefgh.supabase.co
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6YXdvaGtzeGZvZXNvbmhweWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNDU0ODIsImV4cCI6MjA3OTYyMTQ4Mn0._DBZLKdqDFMVE-sLIKORdVVpEXT04fcb0MRiuYxv36o';  // Long string from Supabase
+        // ===== YOUR SUPABASE CONFIGURATION =====
+        const SUPABASE_URL = 'https://czawohksxfoesonhpyke.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';  // REPLACE THIS with your anon public key from Supabase
 
-        // ===== FETCH DATA FROM SUPABASE =====
         async function fetchVisitors() {
             const response = await fetch(`${SUPABASE_URL}/rest/v1/visitors?select=*&order=visit_timestamp.desc&limit=100`, {
                 headers: {
@@ -433,21 +427,18 @@
             return await response.json();
         }
 
-        // ===== PROCESS AND DISPLAY DATA =====
         async function loadDashboard() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('dashboard').style.display = 'none';
 
             try {
-                // Validate configuration
-                if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY_HERE') {
-                    throw new Error('Please configure your Supabase credentials in the HTML file');
+                if (SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
+                    throw new Error('Please replace YOUR_ANON_KEY_HERE with your actual Supabase anon key');
                 }
 
                 const visitors = await fetchVisitors();
                 const pageViews = await fetchPageViews();
 
-                // Check if we have data
                 if (visitors.length === 0) {
                     document.getElementById('loading').innerHTML = `
                         <div class="empty-state">
@@ -459,7 +450,6 @@
                     return;
                 }
 
-                // Calculate stats
                 const totalVisitors = visitors.length;
                 const today = new Date().toISOString().split('T')[0];
                 const todayVisitors = visitors.filter(v => 
@@ -467,13 +457,11 @@
                 ).length;
                 const returnVisitors = visitors.filter(v => v.is_return_visitor).length;
 
-                // Update stats
                 document.getElementById('totalVisitors').textContent = totalVisitors;
                 document.getElementById('todayVisitors').textContent = todayVisitors;
                 document.getElementById('pageViews').textContent = pageViews.length;
                 document.getElementById('returnVisitors').textContent = returnVisitors;
 
-                // Country distribution
                 const countries = {};
                 visitors.forEach(v => {
                     const country = v.country || 'Unknown';
@@ -493,7 +481,6 @@
                         `;
                     });
 
-                // Device breakdown
                 const devices = { Desktop: 0, Mobile: 0, Tablet: 0 };
                 visitors.forEach(v => {
                     const type = v.device_type || 'Desktop';
@@ -528,7 +515,6 @@
                     </div>
                 `;
 
-                // Browser stats
                 const browsers = {};
                 visitors.forEach(v => {
                     const browser = v.browser || 'Unknown';
@@ -548,7 +534,6 @@
                         `;
                     });
 
-                // Recent visitors table
                 const tbody = document.querySelector('#visitorTable tbody');
                 tbody.innerHTML = '';
                 visitors.slice(0, 50).forEach(v => {
@@ -581,7 +566,7 @@
                         <p><strong>Error:</strong> ${error.message}</p>
                         <p style="margin-top: 15px;"><strong>Troubleshooting:</strong></p>
                         <ul style="text-align: left; margin: 10px 0 0 20px;">
-                            <li>Make sure you've replaced YOUR_SUPABASE_URL_HERE and YOUR_SUPABASE_ANON_KEY_HERE with your actual Supabase credentials</li>
+                            <li>Make sure you've replaced YOUR_ANON_KEY_HERE with your actual Supabase anon key</li>
                             <li>Check that you've run the SQL schema in Supabase</li>
                             <li>Verify your Supabase project is active</li>
                             <li>Check browser console for more details (F12)</li>
@@ -591,10 +576,7 @@
             }
         }
 
-        // Auto-refresh every 30 seconds
         setInterval(loadDashboard, 30000);
-
-        // Load dashboard on page load
         window.addEventListener('DOMContentLoaded', loadDashboard);
     </script>
 </body>
