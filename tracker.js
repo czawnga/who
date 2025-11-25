@@ -6,7 +6,7 @@
     
     // ===== YOUR SUPABASE CONFIGURATION =====
     const SUPABASE_URL = 'https://czawohksxfoesonhpyke.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';  // REPLACE THIS with your anon public key
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6YXdvaGtzeGZvZXNvbmhweWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNDU0ODIsImV4cCI6MjA3OTYyMTQ4Mn0._DBZLKdqDFMVE-sLIKORdVVpEXT04fcb0MRiuYxv36o';  // REPLACE THIS with your anon public key
     
     function generateSessionId() {
         const stored = localStorage.getItem('visitor_session_id');
