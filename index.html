@@ -3,48 +3,599 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visitor Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Visitor Analytics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header-subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        th:first-child {
+            border-radius: 10px 0 0 0;
+        }
+
+        th:last-child {
+            border-radius: 0 10px 0 0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .loading h2 {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .loading p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .country-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .country-item {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 18px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .country-item:hover {
+            transform: scale(1.05);
+        }
+
+        .country-name {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .device-chart {
+            margin-top: 20px;
+        }
+
+        .device-bar {
+            background: #e2e8f0;
+            height: 50px;
+            border-radius: 25px;
+            overflow: hidden;
+            display: flex;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .device-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: white;
+            transition: all 0.5s ease;
+        }
+
+        .desktop { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .mobile { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .tablet { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+        .device-legend {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Welcome to the Visitor Portal</h1>
-            <p class="subtitle">Your dedicated space for visitors</p>
+            <h1>📊 Visitor Analytics Dashboard</h1>
+            <p class="header-subtitle">Real-time insights into your website traffic</p>
+            <button class="refresh-btn" onclick="loadDashboard()">🔄 Refresh Data</button>
         </header>
 
-        <main>
-            <section class="welcome-section">
-                <h2>Hello, Visitor! 👋</h2>
-                <p>This is your personalized portal. Here you can find resources, information, and tools designed just for you.</p>
-            </section>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <h2>Loading Analytics...</h2>
+            <p>Fetching your visitor data from the database</p>
+        </div>
 
-            <section class="features">
-                <div class="feature-card">
-                    <h3>📊 Dashboard</h3>
-                    <p>Track your activity and stay updated</p>
+        <div id="dashboard" style="display:none;">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="totalVisitors">0</div>
+                    <div class="stat-label">Total Visitors</div>
                 </div>
-                <div class="feature-card">
-                    <h3>📚 Resources</h3>
-                    <p>Access helpful guides and documents</p>
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-value" id="todayVisitors">0</div>
+                    <div class="stat-label">Today's Visitors</div>
                 </div>
-                <div class="feature-card">
-                    <h3>💬 Support</h3>
-                    <p>Get help when you need it</p>
+                <div class="stat-card">
+                    <div class="stat-icon">👁️</div>
+                    <div class="stat-value" id="pageViews">0</div>
+                    <div class="stat-label">Total Page Views</div>
                 </div>
-            </section>
+                <div class="stat-card">
+                    <div class="stat-icon">🔄</div>
+                    <div class="stat-value" id="returnVisitors">0</div>
+                    <div class="stat-label">Return Visitors</div>
+                </div>
+            </div>
 
-            <section class="cta-section">
-                <button class="cta-button" onclick="handleAction()">Get Started</button>
-            </section>
-        </main>
+            <!-- Geographic Distribution -->
+            <div class="section">
+                <h2 class="section-title">🌍 Geographic Distribution</h2>
+                <div id="countryList" class="country-grid"></div>
+            </div>
 
-        <footer>
-            <p>&copy; 2024 Your Website. All rights reserved.</p>
-            <p><a href="https://yourdomain.com">Back to Main Site</a></p>
-        </footer>
+            <!-- Device Breakdown -->
+            <div class="section">
+                <h2 class="section-title">📱 Device Breakdown</h2>
+                <div id="deviceChart" class="device-chart"></div>
+            </div>
+
+            <!-- Browser Stats -->
+            <div class="section">
+                <h2 class="section-title">🌐 Browser Statistics</h2>
+                <div id="browserStats" class="country-grid"></div>
+            </div>
+
+            <!-- Recent Visitors -->
+            <div class="section">
+                <h2 class="section-title">👥 Recent Visitors (Last 50)</h2>
+                <div style="overflow-x: auto;">
+                    <table id="visitorTable">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Location</th>
+                                <th>IP Address</th>
+                                <th>Device</th>
+                                <th>Browser</th>
+                                <th>OS</th>
+                                <th>Page</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // ===== CONFIGURATION - REPLACE THESE VALUES =====
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';  // e.g., https://abcdefgh.supabase.co
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';  // Long string from Supabase
+
+        // ===== FETCH DATA FROM SUPABASE =====
+        async function fetchVisitors() {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/visitors?select=*&order=visit_timestamp.desc&limit=100`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch visitors: ${response.statusText}`);
+            }
+            
+            return await response.json();
+        }
+
+        async function fetchPageViews() {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/page_views?select=*`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch page views: ${response.statusText}`);
+            }
+            
+            return await response.json();
+        }
+
+        // ===== PROCESS AND DISPLAY DATA =====
+        async function loadDashboard() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+
+            try {
+                // Validate configuration
+                if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY_HERE') {
+                    throw new Error('Please configure your Supabase credentials in the HTML file');
+                }
+
+                const visitors = await fetchVisitors();
+                const pageViews = await fetchPageViews();
+
+                // Check if we have data
+                if (visitors.length === 0) {
+                    document.getElementById('loading').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <h2>No Visitors Yet</h2>
+                            <p>Start tracking visitors by adding the tracking script to your main website!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Calculate stats
+                const totalVisitors = visitors.length;
+                const today = new Date().toISOString().split('T')[0];
+                const todayVisitors = visitors.filter(v => 
+                    v.visit_timestamp && v.visit_timestamp.startsWith(today)
+                ).length;
+                const returnVisitors = visitors.filter(v => v.is_return_visitor).length;
+
+                // Update stats
+                document.getElementById('totalVisitors').textContent = totalVisitors;
+                document.getElementById('todayVisitors').textContent = todayVisitors;
+                document.getElementById('pageViews').textContent = pageViews.length;
+                document.getElementById('returnVisitors').textContent = returnVisitors;
+
+                // Country distribution
+                const countries = {};
+                visitors.forEach(v => {
+                    const country = v.country || 'Unknown';
+                    countries[country] = (countries[country] || 0) + 1;
+                });
+
+                const countryList = document.getElementById('countryList');
+                countryList.innerHTML = '';
+                Object.entries(countries)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([country, count]) => {
+                        countryList.innerHTML += `
+                            <div class="country-item">
+                                <span class="country-name">${country}</span>
+                                <span class="badge">${count}</span>
+                            </div>
+                        `;
+                    });
+
+                // Device breakdown
+                const devices = { Desktop: 0, Mobile: 0, Tablet: 0 };
+                visitors.forEach(v => {
+                    const type = v.device_type || 'Desktop';
+                    devices[type] = (devices[type] || 0) + 1;
+                });
+
+                const total = Object.values(devices).reduce((a, b) => a + b, 0);
+                const deviceChart = document.getElementById('deviceChart');
+                const desktopPct = Math.round(devices.Desktop / total * 100);
+                const mobilePct = Math.round(devices.Mobile / total * 100);
+                const tabletPct = Math.round(devices.Tablet / total * 100);
+
+                deviceChart.innerHTML = `
+                    <div class="device-bar">
+                        ${devices.Desktop > 0 ? `<div class="device-segment desktop" style="width: ${desktopPct}%">Desktop ${desktopPct}%</div>` : ''}
+                        ${devices.Mobile > 0 ? `<div class="device-segment mobile" style="width: ${mobilePct}%">Mobile ${mobilePct}%</div>` : ''}
+                        ${devices.Tablet > 0 ? `<div class="device-segment tablet" style="width: ${tabletPct}%">Tablet ${tabletPct}%</div>` : ''}
+                    </div>
+                    <div class="device-legend">
+                        <div class="legend-item">
+                            <div class="legend-color desktop"></div>
+                            <span>Desktop: ${devices.Desktop}</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color mobile"></div>
+                            <span>Mobile: ${devices.Mobile}</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color tablet"></div>
+                            <span>Tablet: ${devices.Tablet}</span>
+                        </div>
+                    </div>
+                `;
+
+                // Browser stats
+                const browsers = {};
+                visitors.forEach(v => {
+                    const browser = v.browser || 'Unknown';
+                    browsers[browser] = (browsers[browser] || 0) + 1;
+                });
+
+                const browserStats = document.getElementById('browserStats');
+                browserStats.innerHTML = '';
+                Object.entries(browsers)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([browser, count]) => {
+                        browserStats.innerHTML += `
+                            <div class="country-item">
+                                <span class="country-name">${browser}</span>
+                                <span class="badge">${count}</span>
+                            </div>
+                        `;
+                    });
+
+                // Recent visitors table
+                const tbody = document.querySelector('#visitorTable tbody');
+                tbody.innerHTML = '';
+                visitors.slice(0, 50).forEach(v => {
+                    const time = new Date(v.visit_timestamp).toLocaleString();
+                    const location = `${v.city || 'Unknown'}, ${v.country || 'Unknown'}`;
+                    const ip = v.ip_address || 'N/A';
+                    const page = v.current_page ? new URL(v.current_page).pathname : 'N/A';
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${time}</td>
+                            <td>${location}</td>
+                            <td>${ip}</td>
+                            <td>${v.device_type || 'Unknown'}</td>
+                            <td>${v.browser || 'Unknown'} ${v.browser_version || ''}</td>
+                            <td>${v.os || 'Unknown'}</td>
+                            <td>${page}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="error">
+                        <h2>❌ Error Loading Dashboard</h2>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p style="margin-top: 15px;"><strong>Troubleshooting:</strong></p>
+                        <ul style="text-align: left; margin: 10px 0 0 20px;">
+                            <li>Make sure you've replaced YOUR_SUPABASE_URL_HERE and YOUR_SUPABASE_ANON_KEY_HERE with your actual Supabase credentials</li>
+                            <li>Check that you've run the SQL schema in Supabase</li>
+                            <li>Verify your Supabase project is active</li>
+                            <li>Check browser console for more details (F12)</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
+
+        // Load dashboard on page load
+        window.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
 </body>
 </html>
