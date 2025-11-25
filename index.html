@@ -3,45 +3,106 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>WHO</title>
+<title>WHO - Hacker Style</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  html, body {
-    height: 100%;
+
+  body {
     margin: 0;
-    background-color: #000000;
-    color: #00ff00;
+    height: 100vh;
+    overflow: hidden;
+    background: black;
     font-family: 'Share Tech Mono', monospace;
+    color: #00ff00;
     display: flex;
     justify-content: center;
     align-items: center;
-    user-select: none;
-    overflow: hidden;
-  }
-  h1 {
-    font-size: 12vw;
-    letter-spacing: 0.3em;
-    text-shadow:
-      0 0 8px #0f0,
-      0 0 20px #0f0,
-      0 0 30px #0f0,
-      0 0 40px #0f0,
-      0 0 50px #00ff00;
-    animation: flicker 3s infinite;
-    margin: 0;
+    position: relative;
   }
 
-  @keyframes flicker {
-    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+  h1 {
+    z-index: 10;
+    font-size: 14vw;
+    letter-spacing: 0.3em;
+    color: #00ff00;
+    text-shadow:
+      0 0 5px #00ff00,
+      0 0 10px #00ff00,
+      0 0 20px #00ff00,
+      0 0 40px #0f0;
+    animation: neonFlicker 2.5s infinite alternate;
+  }
+
+  @keyframes neonFlicker {
+    0%, 100% {
       opacity: 1;
+      text-shadow:
+        0 0 5px #00ff00,
+        0 0 10px #00ff00,
+        0 0 20px #00ff00,
+        0 0 40px #0f0;
     }
-    20%, 22%, 24%, 55% {
-      opacity: 0.4;
+    50% {
+      opacity: 0.7;
+      text-shadow:
+        0 0 2px #00ff00,
+        0 0 5px #00ff00,
+        0 0 10px #00ff00,
+        0 0 20px #0a0;
     }
+  }
+
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: block;
+    z-index: 1;
   }
 </style>
 </head>
 <body>
-  <h1>WHO</h1>
+
+<h1>WHO</h1>
+<canvas id="matrix"></canvas>
+
+<script>
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+
+  let width, height;
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*+-'.split('');
+  const fontSize = 16;
+  const columns = Math.floor(width / fontSize);
+  const drops = new Array(columns).fill(1);
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = '#0f0';
+    ctx.font = fontSize + 'px Share Tech Mono';
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters[Math.floor(Math.random() * letters.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+      if (drops[i] * fontSize > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+  setInterval(draw, 45);
+</script>
 </body>
 </html>
