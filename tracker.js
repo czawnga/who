@@ -1,21 +1,21 @@
-// Advanced Visitor Tracker with Geolocation
-// Add this script to your main website HTML before </body> tag
-
 (function() {
     'use strict';
     
-    // ===== YOUR SUPABASE CONFIGURATION =====
     const SUPABASE_URL = 'https://czawohksxfoesonhpyke.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6YXdvaGtzeGZvZXNvbmhweWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNDU0ODIsImV4cCI6MjA3OTYyMTQ4Mn0._DBZLKdqDFMVE-sLIKORdVVpEXT04fcb0MRiuYxv36o';  // REPLACE THIS with your anon public key
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6YXdvaGtzeGZvZXNvbmhweWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNDU0ODIsImV4cCI6MjA3OTYyMTQ4Mn0._DBZLKdqDFMVE-sLIKORdVVpEXT04fcb0MRiuYxv36o';
     
     function generateSessionId() {
         const stored = localStorage.getItem('visitor_session_id');
         if (stored) {
-            const sessionData = JSON.parse(stored);
-            if (Date.now() - sessionData.lastActive < 30 * 60 * 1000) {
-                sessionData.lastActive = Date.now();
-                localStorage.setItem('visitor_session_id', JSON.stringify(sessionData));
-                return sessionData.id;
+            try {
+                const sessionData = JSON.parse(stored);
+                if (Date.now() - sessionData.lastActive < 30 * 60 * 1000) {
+                    sessionData.lastActive = Date.now();
+                    localStorage.setItem('visitor_session_id', JSON.stringify(sessionData));
+                    return sessionData.id;
+                }
+            } catch (e) {
+                console.warn('Session parse error:', e);
             }
         }
         
@@ -45,8 +45,6 @@
         } else if (ua.indexOf('Safari') > -1) {
             browser = 'Safari';
             version = ua.match(/Version\/([0-9.]+)/)?.[1] || '';
-        } else if (ua.indexOf('MSIE') > -1 || ua.indexOf('Trident') > -1) {
-            browser = 'Internet Explorer';
         }
         
         return { browser, version };
@@ -59,31 +57,16 @@
         if (ua.indexOf('Windows NT 10') > -1) {
             os = 'Windows';
             version = '10/11';
-        } else if (ua.indexOf('Windows NT 6.3') > -1) {
-            os = 'Windows';
-            version = '8.1';
-        } else if (ua.indexOf('Windows NT 6.2') > -1) {
-            os = 'Windows';
-            version = '8';
-        } else if (ua.indexOf('Windows NT 6.1') > -1) {
-            os = 'Windows';
-            version = '7';
         } else if (ua.indexOf('Windows') > -1) {
             os = 'Windows';
         } else if (ua.indexOf('Mac OS X') > -1) {
             os = 'macOS';
-            const match = ua.match(/Mac OS X ([0-9_]+)/);
-            if (match) version = match[1].replace(/_/g, '.');
         } else if (ua.indexOf('Linux') > -1) {
             os = 'Linux';
         } else if (ua.indexOf('Android') > -1) {
             os = 'Android';
-            const match = ua.match(/Android ([0-9.]+)/);
-            if (match) version = match[1];
-        } else if (ua.indexOf('iOS') > -1 || ua.indexOf('iPhone') > -1 || ua.indexOf('iPad') > -1) {
+        } else if (ua.indexOf('iPhone') > -1 || ua.indexOf('iPad') > -1) {
             os = 'iOS';
-            const match = ua.match(/OS ([0-9_]+)/);
-            if (match) version = match[1].replace(/_/g, '.');
         }
         
         return { os, version };
@@ -94,7 +77,7 @@
         if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
             return 'Tablet';
         }
-        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry/.test(ua)) {
             return 'Mobile';
         }
         return 'Desktop';
@@ -102,19 +85,10 @@
 
     async function getGeolocation() {
         try {
-            const response = await fetch('https://ipapi.co/json/', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error('Geolocation API failed');
-            }
+            const response = await fetch('https://ipapi.co/json/');
+            if (!response.ok) throw new Error('Geo API failed');
             
             const data = await response.json();
-            
             return {
                 ip: data.ip || null,
                 country: data.country_name || null,
@@ -127,23 +101,17 @@
                 isp: data.org || null
             };
         } catch (error) {
-            console.warn('Geolocation tracking failed:', error);
             return {
-                ip: null,
-                country: null,
-                country_code: null,
-                region: null,
-                city: null,
-                latitude: null,
-                longitude: null,
-                timezone: null,
-                isp: null
+                ip: null, country: null, country_code: null, region: null,
+                city: null, latitude: null, longitude: null, timezone: null, isp: null
             };
         }
     }
 
     async function trackVisitor() {
         try {
+            console.log('🔍 Tracking visitor...');
+            
             const sessionId = generateSessionId();
             const browserInfo = getBrowserInfo();
             const osInfo = getOSInfo();
@@ -167,7 +135,7 @@
                 device_type: getDeviceType(),
                 screen_width: window.screen.width,
                 screen_height: window.screen.height,
-                language: navigator.language || navigator.userLanguage,
+                language: navigator.language,
                 referrer: document.referrer || 'Direct',
                 landing_page: window.location.href,
                 current_page: window.location.href,
@@ -186,27 +154,18 @@
                 body: JSON.stringify(visitorData)
             });
             
-            if (!response.ok) {
-                throw new Error(`Tracking failed: ${response.statusText}`);
+            if (response.ok) {
+                localStorage.setItem('has_visited', 'true');
+                console.log('✅ Visitor tracked!');
             }
-            
-            localStorage.setItem('has_visited', 'true');
-            console.log('✅ Visitor tracked successfully');
         } catch (error) {
-            console.error('❌ Visitor tracking error:', error);
+            console.error('❌ Tracking error:', error);
         }
     }
 
     async function trackPageView() {
         try {
             const sessionId = generateSessionId();
-            
-            const pageData = {
-                session_id: sessionId,
-                page_url: window.location.href,
-                page_title: document.title
-            };
-
             await fetch(`${SUPABASE_URL}/rest/v1/page_views`, {
                 method: 'POST',
                 headers: {
@@ -215,49 +174,23 @@
                     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                     'Prefer': 'return=minimal'
                 },
-                body: JSON.stringify(pageData)
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    page_url: window.location.href,
+                    page_title: document.title
+                })
             });
-            
-            console.log('✅ Page view tracked');
         } catch (error) {
-            console.error('❌ Page view tracking error:', error);
+            console.error('Page view error:', error);
         }
     }
 
-    let startTime = Date.now();
-    let pageVisible = true;
-
-    document.addEventListener('visibilitychange', () => {
-        pageVisible = !document.hidden;
-    });
-
-    window.addEventListener('beforeunload', () => {
-        if (pageVisible) {
-            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-            
-            const sessionId = generateSessionId();
-            const blob = new Blob([JSON.stringify({
-                session_id: sessionId,
-                page_url: window.location.href,
-                page_title: document.title,
-                time_on_page: timeSpent
-            })], { type: 'application/json' });
-            
-            navigator.sendBeacon(
-                `${SUPABASE_URL}/rest/v1/page_views?apikey=${SUPABASE_ANON_KEY}`,
-                blob
-            );
-        }
-    });
-
     function initTracking() {
         const tracked = sessionStorage.getItem('tracked_this_session');
-        
         if (!tracked) {
             trackVisitor();
             sessionStorage.setItem('tracked_this_session', 'true');
         }
-        
         trackPageView();
     }
 
@@ -266,5 +199,16 @@
     } else {
         initTracking();
     }
-
 })();
+```
+
+---
+
+## 🧪 After Uploading:
+
+1. **Clear your browser cache** (Ctrl + Shift + Delete)
+2. **Visit your website**: `https://edwardlalnipuia.fun`
+3. **Open Console (F12)** - You should see:
+```
+   🔍 Tracking visitor...
+   ✅ Visitor tracked!
